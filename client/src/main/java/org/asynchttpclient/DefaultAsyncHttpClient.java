@@ -22,6 +22,7 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.asynchttpclient.channel.ChannelPool;
+import org.asynchttpclient.cookie.CookieStore;
 import org.asynchttpclient.filter.FilterContext;
 import org.asynchttpclient.filter.FilterException;
 import org.asynchttpclient.filter.RequestFilter;
@@ -190,9 +191,10 @@ public class DefaultAsyncHttpClient implements AsyncHttpClient {
 
   @Override
   public <T> ListenableFuture<T> executeRequest(Request request, AsyncHandler<T> handler) {
-    if (config.getCookieStore() != null) {
+    CookieStore cookieStore = request.getCookieStore() != null ? request.getCookieStore() : config.getCookieStore();
+    if (cookieStore != null) {
       try {
-        List<Cookie> cookies = config.getCookieStore().get(request.getUri());
+        List<Cookie> cookies = cookieStore.get(request.getUri());
         if (!cookies.isEmpty()) {
           RequestBuilder requestBuilder = new RequestBuilder(request);
           for (Cookie cookie : cookies) {
